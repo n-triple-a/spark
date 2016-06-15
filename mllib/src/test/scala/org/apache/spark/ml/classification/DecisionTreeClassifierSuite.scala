@@ -95,7 +95,7 @@ class DecisionTreeClassifierSuite
     // scalastyle:on println
     val IrIsRDD = sc.parallelize(data)
     val dt = new DecisionTreeClassifier()
-      .setImpurity("weightedgini")
+      .setImpurity("gini")
       .setMaxDepth(3)
       .setMaxBins(400)
       .setMinInstancesPerNode(1)

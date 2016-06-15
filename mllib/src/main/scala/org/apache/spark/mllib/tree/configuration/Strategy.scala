@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import org.apache.spark.annotation.Since
 import org.apache.spark.mllib.tree.configuration.Algo._
 import org.apache.spark.mllib.tree.configuration.QuantileStrategy._
-import org.apache.spark.mllib.tree.impurity.{Entropy, Gini, Impurity, Variance, WeightedGini}
+import org.apache.spark.mllib.tree.impurity.{Entropy, Gini, Impurity, Variance}
 
 /**
  * Stores all the configuration options for tree construction
@@ -32,7 +32,6 @@ import org.apache.spark.mllib.tree.impurity.{Entropy, Gini, Impurity, Variance, 
  *              [[org.apache.spark.mllib.tree.configuration.Algo.Regression]]
  * @param impurity Criterion used for information gain calculation.
  *                 Supported for Classification: [[org.apache.spark.mllib.tree.impurity.Gini]],
-  *                 [[org.apache.spark.mllib.tree.impurity.WeightedGini]],
  *                  [[org.apache.spark.mllib.tree.impurity.Entropy]].
  *                 Supported for Regression: [[org.apache.spark.mllib.tree.impurity.Variance]].
  * @param maxDepth Maximum depth of the tree (e.g. depth 0 means 1 leaf node, depth 1 means
@@ -143,9 +142,9 @@ class Strategy @Since("1.3.0") (
         require(numClasses >= 2,
           s"DecisionTree Strategy for Classification must have numClasses >= 2," +
           s" but numClasses = $numClasses.")
-        require(Set(Gini, Entropy, WeightedGini).contains(impurity),
+        require(Set(Gini, Entropy).contains(impurity),
           s"DecisionTree Strategy given invalid impurity for Classification: $impurity." +
-          s"  Valid settings: Gini, Entropy, WeightedGini")
+          s"  Valid settings: Gini, Entropy")
       case Regression =>
         require(impurity == Variance,
           s"DecisionTree Strategy given invalid impurity for Regression: $impurity." +
@@ -166,7 +165,7 @@ class Strategy @Since("1.3.0") (
     require(subsamplingRate > 0 && subsamplingRate <= 1,
       s"DecisionTree Strategy requires subsamplingRate <=1 and >0, but was given " +
       s"$subsamplingRate")
-    if (impurity == WeightedGini) {
+    if (algo == Classification) {
       require(numClasses == classWeights.length,
         s"DecisionTree Strategy requires the number of class weights be the same as the " +
         s"number of classes, but there are $numClasses classes and ${classWeights.length} weights")
