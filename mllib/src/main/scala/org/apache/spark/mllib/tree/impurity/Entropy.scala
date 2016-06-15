@@ -181,7 +181,7 @@ private[spark] class EntropyCalculator(stats: Array[Double], classWeights: Array
     require(stats.length == other.stats.length,
       s"Two ImpurityCalculator instances cannot be added with different counts sizes." +
         s"  Sizes are ${stats.length} and ${other.stats.length}.")
-    val otherCalculator = other.asInstanceOf[WeightedGiniCalculator]
+    val otherCalculator = other.asInstanceOf[EntropyCalculator]
     var i = 0
     val len = other.stats.length
     while (i < len) {
@@ -200,7 +200,7 @@ private[spark] class EntropyCalculator(stats: Array[Double], classWeights: Array
     require(stats.length == other.stats.length,
       s"Two ImpurityCalculator instances cannot be subtracted with different counts sizes." +
         s"  Sizes are ${stats.length} and ${other.stats.length}.")
-    val otherCalculator = other.asInstanceOf[WeightedGiniCalculator]
+    val otherCalculator = other.asInstanceOf[EntropyCalculator]
     var i = 0
     val len = other.stats.length
     while (i < len) {

@@ -52,6 +52,8 @@ class RandomForestClassifier @Since("1.4.0") (
   @Since("1.4.0")
   def this() = this(Identifiable.randomUID("rfc"))
 
+  var IsClassWeightsSet: Boolean = false
+
   // Override parameter setters from parent trait for Java API compatibility.
 
   // Parameters from TreeClassifierParams:
@@ -99,12 +101,20 @@ class RandomForestClassifier @Since("1.4.0") (
     super.setFeatureSubsetStrategy(value)
 
   @Since("2.0.0")
-  override def setClassWeights(value: Array[Double]): this.type = super.setClassWeights(value)
+  override def setClassWeights(value: Array[Double]): this.type = {
+    IsClassWeightsSet = true
+    super.setClassWeights(value)
+  }
 
   override protected def train(dataset: Dataset[_]): RandomForestClassificationModel = {
     val categoricalFeatures: Map[Int, Int] =
       MetadataUtils.getCategoricalFeatures(dataset.schema($(featuresCol)))
     val numClasses: Int = getNumClasses(dataset)
+    // Set default classWeights
+    if (!IsClassWeightsSet) {
+      val classWeights = Array.fill(numClasses)(1.0)
+      this.setClassWeights(classWeights)
+    }
     val oldDataset: RDD[LabeledPoint] = extractLabeledPoints(dataset, numClasses)
     val strategy =
       super.getOldStrategy(categoricalFeatures, numClasses,

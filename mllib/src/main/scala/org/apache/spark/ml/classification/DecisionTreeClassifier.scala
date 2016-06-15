@@ -52,6 +52,8 @@ class DecisionTreeClassifier @Since("1.4.0") (
   @Since("1.4.0")
   def this() = this(Identifiable.randomUID("dtc"))
 
+  var IsClassWeightsSet: Boolean = false
+
   // Override parameter setters from parent trait for Java API compatibility.
 
   @Since("1.4.0")
@@ -83,12 +85,19 @@ class DecisionTreeClassifier @Since("1.4.0") (
   override def setSeed(value: Long): this.type = super.setSeed(value)
 
   @Since("2.0.0")
-  override def setClassWeights(value: Array[Double]): this.type = super.setClassWeights(value)
+  override def setClassWeights(value: Array[Double]): this.type = {
+    IsClassWeightsSet = true
+    super.setClassWeights(value)
+  }
 
   override protected def train(dataset: Dataset[_]): DecisionTreeClassificationModel = {
     val categoricalFeatures: Map[Int, Int] =
       MetadataUtils.getCategoricalFeatures(dataset.schema($(featuresCol)))
     val numClasses: Int = getNumClasses(dataset)
+    if (!IsClassWeightsSet) {
+      val classWeights = Array.fill(numClasses)(1.0)
+      this.setClassWeights(classWeights)
+    }
     val oldDataset: RDD[LabeledPoint] = extractLabeledPoints(dataset, numClasses)
     val strategy = getOldStrategy(categoricalFeatures, numClasses)
 
